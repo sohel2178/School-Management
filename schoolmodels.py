@@ -1,5 +1,5 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column,String,DateTime,Integer
+from sqlalchemy import Column,String,DateTime,Integer,UniqueConstraint
 from sqlalchemy import create_engine,ForeignKey
 from sqlalchemy.orm import sessionmaker,relationship
 
@@ -16,14 +16,20 @@ class Course(Base):
 class Subject(Base):
     __tablename__ = 'subjects'
     id = Column(Integer, primary_key=True)
-    name = Column(String(50))
+    name = Column(String(50),nullable=False)
+    part = Column(String(4),nullable=False)
     course_id = Column(Integer,ForeignKey('courses.id'))
     course = relationship("Course", back_populates="subjects")
     teacher_id = Column(Integer,ForeignKey('teachers.id'))
     teacher = relationship("Teacher",back_populates='subjects')
+    classroom_id = Column(Integer,ForeignKey('classrooms.id'))
+    classroom = relationship("ClassRoom",back_populates='subjects')
+
+
+    __table_args__ = (UniqueConstraint('name','part','course_id',name='subject_course_part'),)
 
     def __repr__(self):
-        return f"{self.name} {self.course.name}"
+        return f"{self.name} {self.part} {self.course.name}"
 
 
 
@@ -57,8 +63,12 @@ class ClassRoom(Base):
     __tablename__ = 'classrooms'
     id = Column(Integer, primary_key=True)
     name = Column(String)
-    teachers = Column(String)
-    subjects = Column(String)
+    subjects = relationship("Subject",back_populates="classroom")
+
+
+
+    def __repr__(self):
+        return f"< id={self.id} {self.name} >"
 
 
 class DataBase():
@@ -84,12 +94,36 @@ class DataBase():
     def get_all_course(self):
         return self.session.query(Course).order_by(Course.id).all()
 
+
+    # SubJECT SECTION
+
     def add_subject(self,subject):
         self.session.add(subject)
         self.session.commit()
 
     def get_all_subject(self):
         return self.session.query(Subject).order_by(Subject.id).all()
+
+    def update_subject_teacher_id(self,subject_id,teacher_id):
+        try:
+            subject = self.session.query(Subject).filter_by(id=subject_id).first()
+            subject.teacher_id = teacher_id
+            self.session.commit()
+
+        except Exception as e:
+            print(str(e))
+
+
+    def update_subject_classroom_id(self,subject_id,classroom_id):
+        try:
+            subject = self.session.query(Subject).filter_by(id=subject_id).first()
+            subject.classroom_id = classroom_id
+            self.session.commit()
+
+        except Exception as e:
+            print(str(e))
+
+
 
 
     # Teacher Section
@@ -99,5 +133,18 @@ class DataBase():
 
     def get_all_teacher(self):
         return self.session.query(Teacher).order_by(Teacher.id).all()
+
+    def get_teacher_by_id(self,id):
+        return self.session.query(Teacher).filter_by(id=id).first()
+
+
+    # CLASS ROOM
+
+    def add_classroom(self,classroom):
+        self.session.add(classroom)
+        self.session.commit()
+
+    def get_all_classroom(self):
+        return self.session.query(ClassRoom).order_by(ClassRoom.id).all()
 
     
