@@ -11,6 +11,7 @@ class Course(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(50),unique=True)
     subjects = relationship("Subject",back_populates='course')
+    students = relationship("Student",back_populates='course')
 
 
 class Subject(Base):
@@ -69,6 +70,25 @@ class ClassRoom(Base):
 
     def __repr__(self):
         return f"< id={self.id} {self.name} >"
+
+
+
+class Student(Base):
+    __tablename__ = 'students'
+
+    id = Column(Integer,primary_key=True)
+    first_name = Column(String(50),nullable=False)
+    last_name = Column(String(50),nullable=False)
+    email = Column(String(50))
+    registration_date = Column(DateTime)
+    race = Column(String(20))
+    gender = Column(String(20))
+    home_telephone = Column(String(50))
+    cell_phone = Column(String(50))
+    course_id = Column(Integer,ForeignKey('courses.id'))
+    course = relationship("Course",back_populates='students')
+
+
 
 
 class DataBase():
@@ -147,4 +167,22 @@ class DataBase():
     def get_all_classroom(self):
         return self.session.query(ClassRoom).order_by(ClassRoom.id).all()
 
-    
+
+    # Student Part
+
+    def add_student(self,student):
+        self.session.add(student)
+        self.session.commit()
+
+    def get_all_student(self):
+        return self.session.query(Student).order_by(Student.id).all()
+
+    def update_student_course(self,student_id,course_id):
+        try:
+            student = self.session.query(Student).filter_by(id=student_id).first()
+            student.course_id = course_id
+            self.session.commit()
+
+        except Exception as e:
+            print(str(e))
+

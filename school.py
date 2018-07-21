@@ -1,10 +1,48 @@
-from schoolmodels import DataBase,Course,Subject,Teacher,ClassRoom
+from schoolmodels import DataBase,Course,Subject,Teacher,ClassRoom,Student
+import random
+
+
+name_list= ['Sohel','Shakil','Arham','Rashin','Putul','Sumi','Sajib','Redwan']
+lastname_list= ['Ahmed','Mahmud','Khan','Sikdar','Rahman','Biswas','Moin']
+
+
+
+def create_user(n):
+    user_list =[]
+    for i in range(n):
+        user ={}
+        first_name = name_list[random.randrange(0,len(name_list))]
+        last_name = lastname_list[random.randrange(0,len(lastname_list))]
+
+        user['first_name']=first_name
+        user['last_name']=last_name
+        user_list.append(user)
+
+    return user_list
 
 
 if __name__ == '__main__':
     database = DataBase('sqlite:///school.db')
 
+    # for x in create_user(20):
+    #     student = Student(first_name=x['first_name'],last_name=x['last_name'])
+    #     database.add_student(student)
+
+   
+
+
     # database.drop_all()
+
+    for x in database.get_all_course():
+        print(x.name,[i.first_name for i in x.students])
+
+    # for x in database.get_all_student():
+    #     print(x.first_name,x.course)
+
+    # database.update_student_course(1,2)
+    # database.update_student_course(2,1)
+    # database.update_student_course(3,1)
+    # database.update_student_course(4,2)
 
 
     # database.update_subject_teacher_id(1,1)
@@ -19,12 +57,12 @@ if __name__ == '__main__':
     # database.update_subject_classroom_id(3,3)
     # database.update_subject_classroom_id(4,2)
 
-    # for x in database.get_all_subject():
-    #     print(x.name,x.part,x.classroom,x.teacher,x.course.name)
+    # for x in database.get_all_course():
+    #     print(x.name,x.students)
 
-    teac1 = database.get_teacher_by_id(1)
+    # teac1 = database.get_teacher_by_id(3)
 
-    print(teac1.subjects)
+    # print(teac1.subjects)
 
 
     # Insert Some Class Room
